@@ -20,6 +20,19 @@ namespace _41
     /// </summary>
     public partial class ProductPage : Page
     {
+        public ProductPage()
+        {
+            InitializeComponent();
+            
+            var currentProduct = Yamgurova41Entities.GetContext().Product.ToList();
+
+            ProductListView.ItemsSource = currentProduct;
+
+            ComboType.SelectedIndex = 0;
+
+            UpdateProduct();
+        }
+
         public ProductPage(User user)
         {
             InitializeComponent();

@@ -168,6 +168,7 @@
     <None Include="Yamgurova41.edmx.diagram">
       <DependentUpon>Yamgurova41.edmx</DependentUpon>
     </None>
+    <None Include="images\Thumbs.db" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -182,6 +183,16 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="images\B320R5.jpg" />
+    <Resource Include="images\D329H3.jpg" />
+    <Resource Include="images\D572U8.jpg" />
+    <Resource Include="images\F572H7.jpg" />
+    <Resource Include="images\F635R4.jpg" />
+    <Resource Include="images\G432E4.jpg" />
+    <Resource Include="images\G783F5.jpg" />
+    <Resource Include="images\H782T5.jpg" />
+    <Resource Include="images\J384T6.jpg" />
+    <Resource Include="images\А112Т4.jpg" />
     <Resource Include="res\picture.png" />
     <Content Include="Yamgurova41.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

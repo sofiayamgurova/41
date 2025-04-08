@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Packaging;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace _41
 {
@@ -21,20 +23,51 @@ namespace _41
     /// </summary>
     public partial class Page1 : Page
     {
+        private DispatcherTimer timer;
+        private int count = 10;
+        private string _captchaAnswer = "";
+        private string _ValidLitters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwyz1234567890";
+        private bool _isCaptched = false;
         public Page1()
         {
             InitializeComponent();
+            TBCaptcha.Visibility = Visibility.Hidden;
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(1);
+            timer.Tick += Timer_Tick;
         }
+        private void CaptchaEnable()
+        {
+            _isCaptched = false;
+            TBCaptcha.Visibility = Visibility.Visible;
+
+
+            Random random = new Random();
+
+            captchaOneWord.Text = Convert.ToString(_ValidLitters[random.Next(_ValidLitters.Length)]);
+            captchaTwoWord.Text = Convert.ToString(_ValidLitters[random.Next(_ValidLitters.Length)]);
+            captchaThreeWord.Text = Convert.ToString(_ValidLitters[random.Next(_ValidLitters.Length)]);
+            captchaFourWord.Text = Convert.ToString(_ValidLitters[random.Next(_ValidLitters.Length)]);
+
+            _captchaAnswer = captchaOneWord.Text + captchaTwoWord.Text + captchaThreeWord.Text + captchaFourWord.Text;
+            
+
+        }
+
 
         private void LogingGuest_Click(object sender, RoutedEventArgs e)
         {
-            string login = LoginTB.Text;
-            string password = PassTB.Text;
-            User user = Yamgurova41Entities.GetContext().User.ToList().Find(p => p.UserLogin == login && p.UserPassword == password);
-            Manager.MainFrame.Navigate(new ProductPage(user));
+            Manager.MainFrame.Navigate(new ProductPage());
+            LoginTB.Text = "";
+            PassTB.Text = "";
+            CaptchaPanel.Visibility = Visibility.Collapsed; 
+            _isCaptched = false;
+
+
+
         }
 
-        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        private async void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             string login = LoginTB.Text;
             string password = PassTB.Text;
@@ -44,20 +77,81 @@ namespace _41
                 return;
             }
 
+            if (TBCaptcha.Text == _captchaAnswer)
+                _isCaptched = true;
+
+            if (_isCaptched)
+            {
+                if (TBCaptcha.Text != _captchaAnswer)
+                {
+                    MessageBox.Show("Каптча введена неверно!");
+                    CaptchaEnable();
+                    LoginButton.IsEnabled = false;
+                    await Task.Delay(10000);
+                    LoginButton.IsEnabled = true;
+                    return;
+                }
+                _isCaptched = false;
+                CaptchaPanel.Visibility = Visibility;
+            }
+            if (login == "" || password == "")
+            {
+                MessageBox.Show("Есть пустые поля");
+                CaptchaEnable();
+                return;
+            }
+
             User user = Yamgurova41Entities.GetContext().User.ToList().Find(p => p.UserLogin == login && p.UserPassword == password);
             if (user != null)
             {
                 Manager.MainFrame.Navigate(new ProductPage(user));
                 LoginTB.Text = "";
                 PassTB.Text = "";
+                CaptchaDisable();
             }
             else
             {
                 MessageBox.Show("Введены неверные данные");
-                LoginButton.IsEnabled = false;
-                Thread.Sleep(10000); // 10 секунд таймер
-                LoginButton.IsEnabled = true;
+                if (TBCaptcha.IsVisible)
+                {
+                    LoginButton.IsEnabled = false;
+                    for (int i = 10; i >= 0; i--)
+                    {
+                        Timer.Text = i.ToString();
+                        await Task.Delay(1000); // Ждем 1 секунду
+                        if (i == 0)
+                        {
+                            Timer.Visibility = Visibility.Hidden;
+                        }
+                    }
+                    LoginButton.IsEnabled = true;
+                }
+                CaptchaEnable();
             }
+        }
+        private void CaptchaDisable()
+        {
+            _isCaptched = true;
+            TBCaptcha.Visibility = Visibility.Hidden;
+            captchaOneWord.Text = "";
+            captchaTwoWord.Text = "";
+            captchaThreeWord.Text = "";
+            captchaFourWord.Text = "";
+            TBCaptcha.Text = "";
+        }
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            count--;
+            Timer.Text = count.ToString();
+
+            if (count <= 0)
+            {
+                timer.Stop();
+            }
+        }
+        private void CheckCaptchaButton_Click_1(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
